@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const campaignSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
     title: {
         type: String,
         required: true
@@ -13,11 +18,15 @@ const campaignSchema = new mongoose.Schema({
         type: String
     },
     time: {
-        type: Date,
+        type: String,
+        required: true
+    },
+    date: {
+        type: String,
         required: true
     },
     address: {
-        type: String,
+        type: Object,
         required: true
     },
     pincode: {
@@ -25,10 +34,18 @@ const campaignSchema = new mongoose.Schema({
         required: true
     },
     contactNo: {
-        type: Number
+        type: String
     },
     coverImage: {
         type: String
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    report: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true })
 

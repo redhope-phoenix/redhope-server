@@ -1,28 +1,57 @@
 import mongoose from "mongoose";
 
 const requestSchema = new mongoose.Schema({
-    username: {
+    requestedBy: {
+        type: mongoose.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    applicant: {
         type: String,
         required: true
     },
     phoneNo: {
-        type: Number,
+        type: String,
         required: true
     },
     reason: {
         type: String
     },
     date: {
-        type: Date,
+        type: String,
+        required: true
+    },
+    bloodGroup: {
+        type: String,
         required: true
     },
     address: {
-        type: String,
+        type: Object,
         required: true
     },
     pincode: {
         type: String,
         required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    isFulfilled: {
+        type: Boolean,
+        default: false
+    },
+    reachedTo: {
+        type: Number,
+        default: 0
+    },
+    approvedBy: {
+        type: Number,
+        default: 0
+    },
+    report: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true })
 

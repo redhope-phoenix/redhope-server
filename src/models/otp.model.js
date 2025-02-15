@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
-import { sendSms } from "../utils/sms-service";
+import { sendSms } from "../utils/sms-service.js";
 
 const otpSchema = new mongoose.Schema({
     phoneNo: {

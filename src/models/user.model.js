@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 const userSchema = new Schema({
-    username: {
+    userName: {
         type: String,
         required: true
     },
@@ -22,26 +22,26 @@ const userSchema = new Schema({
         type: String
     },
     phoneNo: {
-        type: Number,
-        unique: true
-    },
-    address: {
         type: String
     },
+    address: {
+        type: Object
+    },
     pincode: {
-        type: Number
+        type: String
     },
     bloodGroup: {
         type: String
     },
     dateOfBirth: {
-        type: Number
+        type: String,
+        required: true
     },
-    isDetailsFilled: {
+    isBloodGroupAdded: {
         type: Boolean,
         default: false
     },
-    isPhoneVerified: {
+    isContactInfoFilled: {
         type: Boolean,
         default: false
     },
@@ -73,10 +73,9 @@ userSchema.methods.checkPassword = async function (password) {
 }
 
 // generates tokens with id
-userSchema.methods.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = async function () {
     return (
         jwt.sign({
-            email: this.email,
             _id: this._id
         }, process.env.ACCESS_TOKEN_SECRET, {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
@@ -88,8 +87,8 @@ userSchema.methods.generateRefreshToken = function () {
     return (
         jwt.sign({
             _id: this._id
-        }, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }, process.env.REFRESH_TOKEN_SECRET, {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         })
     )
 }

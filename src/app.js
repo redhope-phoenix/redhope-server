@@ -22,7 +22,11 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }))
 app.use(express.static('public'))
 
 import userRouter from "./routes/user.routes.js"
+import campaignRouter from "./routes/campaign.routes.js";
+import requestRouter from "./routes/request.routes.js";
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/campaign", campaignRouter);
+app.use("/api/v1/request", requestRouter);
 
 export { app };

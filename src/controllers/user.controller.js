@@ -10,20 +10,21 @@ import { createOtp } from "./otp.controller.js";
 
 // regiater user with email
 const registerUser = asyncHandler(async (req, res) => {
-    const { userName, email, password } = req.body;
+    const { userName, email, password, dateOfBirth } = req.body;
 
-    if ([userName, email, password].some(e => e === '')) {
+    if ([userName, email, password, dateOfBirth].some(e => e === '')) {
         throw new ApiError(400, 'Fields are required')
     }
 
     const existedUser = await User.findOne({ email })
 
-    if (existedUser) throw new ApiError(401, 'User already exist')
+    if (existedUser) throw new ApiError(402, 'User already exist');
 
-    const user = await User.create({
-        userName,
+    await User.create({
+        userName: userName,
         email,
-        password
+        password,
+        dateOfBirth
     })
 
     return (
@@ -40,10 +41,14 @@ const generateAccessAndRefreshToken = async (userId) => {
         const user = await User.findById(userId)
         const accessToken = await user.generateAccessToken();
         const refreshToken = await user.generateRefreshToken();
-        if (!accessToken || refreshToken) throw new ApiError(401, "Unable to generate tokens");
+        if (!accessToken || !refreshToken) throw new ApiError(401, "Unable to generate tokens");
         user.refreshToken = refreshToken;
         user.save({ validateBeforeSave: false });
+
+        return { accessToken, refreshToken };
     } catch (error) {
+        console.log(error);
+
         throw new ApiError(501, "Server error on generating tokens");
     }
 }
@@ -142,36 +147,40 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 })
 
-// update user details
-const updatePhoneNumber = asyncHandler(async (req, res) => {
-    const { phoneNo, otpCode, oId } = req.body;
-    if (!phoneNo || !otpCode || !oId) throw new ApiError(400, "All fields are required");
-    // check otp
-    const otp = await Otp.findById(oId);
-    if (!otp || otp?.isUsed) throw new ApiError(401, "Invalid Otp");
-    const isOtpCorrect = await otp.checkOtp(otpCode);
-    if (!isOtpCorrect) throw new ApiError(401, "Incorrect otp");
-    otp.isUsed == true;
-    otp.save({ validateBeforeSave: false });
-    // update phone no
-    await User.findByIdAndUpdate(req.user._id, {
-        $set: { phoneNo, isPhoneVerified: true }
-    }, { new: true })
+const checkAuth = asyncHandler(async (req, res) => {
+    let isAuthenticated;
+    if (req.user) isAuthenticated = true;
+    else isAuthenticated = false;
 
     return res.status(200)
-        .json(new ApiResponse(200, {}, "Phone No updated"))
-});
+        .json(new ApiResponse(200, { isAuthenticated }, "Authentication fetched"))
+})
 
-const updateUserDetails = asyncHandler(async (req, res) => {
-    const { bloodGroup, dateOfBirth, address, pincode } = req.body;
+// update user details
+const updateBloodGroup = asyncHandler(async (req, res) => {
+    const { bloodGroup } = req.body;
+    if (!bloodGroup) throw new ApiError(400, "blood group is required");
+    await User.findByIdAndUpdate(req.user._id, {
+        $set: {
+            bloodGroup,
+            isBloodGroupAdded: true
+        }
+
+    }, { new: true });
+
+    return res.status(200)
+        .json(new ApiResponse(200, {}, "Blood group updated"))
+})
+
+const updateUserContactDetails = asyncHandler(async (req, res) => {
+    const { phoneNo, address, pincode } = req.body;
     const user = await User.findByIdAndUpdate(req.user._id, {
         pincode,
         address,
-        bloodGroup,
-        dateOfBirth,
+        phoneNo
     });
-    if (bloodGroup && dateOfBirth && address && pincode && user?.phoneNo) {
-        user.isDetailsFilled = true;
+    if (address && pincode && phoneNo) {
+        user.isContactInfoFilled = true;
     }
 
     user.save({ validateBeforeSave: false });
@@ -182,7 +191,7 @@ const updateUserDetails = asyncHandler(async (req, res) => {
 // update user credentials, avatar and user formal details
 const updatePassword = asyncHandler(async (req, res) => {
     const { currentPassword, newPassword } = req.body
-    if (!currentPassword || !newPassword) throw new ApiError(400, "All fields are required")
+    if (!newPassword) throw new ApiError(400, "All fields are required")
     const user = await User.findById(req.user?._id)
 
     // verifies current password
@@ -198,15 +207,17 @@ const updatePassword = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { username, email } = req.body
+    const { username, email, dateOfBirth } = req.body
+    const currentUser = await User.findById(req.user?._id);
     const existedUser = await User.findOne({ email });
-    if (existedUser) throw new ApiError(401, "Email already in use");
+    if (existedUser && existedUser?.email !== currentUser.email) throw new ApiError(402, "Email already in use");
 
     await User.findByIdAndUpdate(req.user?._id,
         {
             $set: {
                 username,
-                email
+                email,
+                dateOfBirth
             }
         },
         {
@@ -240,15 +251,33 @@ const updateAvatar = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Avatar updated successfully"))
 })
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user?._id).select("-password -refreshToken");
+
+    return res.status(200)
+        .json(new ApiResponse(200, user, "User fetched"))
+})
+
+const getUserById = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    const user = await User.findById(userId).select("-password -refreshToken");
+
+    return res.status(200)
+        .json(new ApiResponse(200, user, "User fetched"))
+})
+
 export {
     registerUser,
     generateAccessAndRefreshToken,
     loginUser,
     logoutUser,
     refreshAccessToken,
-    updatePhoneNumber,
-    updateUserDetails,
+    checkAuth,
+    updateBloodGroup,
+    updateUserContactDetails,
     updatePassword,
     updateUser,
-    updateAvatar
+    updateAvatar,
+    getCurrentUser,
+    getUserById
 }
