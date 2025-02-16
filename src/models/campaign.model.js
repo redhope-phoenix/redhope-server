@@ -17,12 +17,8 @@ const campaignSchema = new mongoose.Schema({
     description: {
         type: String
     },
-    time: {
-        type: String,
-        required: true
-    },
     date: {
-        type: String,
+        type: Date,
         required: true
     },
     address: {
@@ -36,7 +32,7 @@ const campaignSchema = new mongoose.Schema({
     contactNo: {
         type: String
     },
-    coverImage: {
+    leaflet: {
         type: String
     },
     isActive: {

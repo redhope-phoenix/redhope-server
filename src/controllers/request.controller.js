@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import { Request } from "../models/request.model.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
@@ -7,6 +7,8 @@ import { ApiError } from "../utils/api-error.js";
 import { User } from "../models/user.model.js";
 import { Help } from "../models/help.model.js";
 import { createNotification } from "./notification.controller.js";
+import { sendNodeEmail } from "../utils/send-email.js";
+import { donationRequirementMail } from "../utils/html.js";
 
 // creates a new request
 const createRequest = asyncHandler(async (req, res) => {
@@ -16,12 +18,75 @@ const createRequest = asyncHandler(async (req, res) => {
         requestedBy, phoneNo, date, address, pincode, reason, bloodGroup, applicant
     });
 
+    // alerts others
+    let alertPincodeList = [];
+    for (let i = -2; i < 3; i++)alertPincodeList.push({ pincode: Number(pincode) + i });
+
+    let bloodGroupList = [];
+    if (bloodGroup === "AB+") bloodGroupList = ["A+", "B+", "AB+", "O+", "A-", "B-", "AB-", "O-"];
+    else if (bloodGroup === "AB-") bloodGroupList = ["A-", "B-", "AB-", "O-"];
+    else if (bloodGroup[1] === "+") bloodGroupList = [bloodGroup, `${bloodGroup[0]}-`, `O${bloodGroup[1]}`, "O-"];
+    else if (bloodGroup[1] === "-") bloodGroupList = [bloodGroup, "O-"];
+    else bloodGroupList = [bloodGroup];
+
+    const bloodGroupObjList = bloodGroupList.map(e => ({ bloodGroup: e }));
+
+    const alertUserList = await User.aggregate([
+        {
+            $match: {
+                $or: alertPincodeList,
+                $or: bloodGroupObjList
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                userName: 1,
+                email: 1
+            }
+        }
+    ]);
+
+    // notify users
+    alertUserList?.forEach(async (user) => {
+        if (user?._id !== req.user._id) {
+            // sends notifications
+            await createNotification({
+                title: "Urgent blood donation required",
+                body: `An urgent blood donation required in your locality. ${applicant} needs an urgent donation. Try to help him/her.`,
+                actions: [
+                    {
+                        name: `Help ${applicant}`,
+                        nvaigate: `/request/${request?._id}`
+                    }
+                ]
+            });
+
+            await sendNodeEmail({
+                mailTo: user?.email,
+                subject: "Blood requirement alert from Redhope",
+                html: donationRequirementMail({
+                    userName: user?.userName,
+                    bloodGroup: bloodGroup,
+                    address: `${address?.addressLine}, ${address?.district},${address.state} - ${pincode}`,
+                    phoneNo: phoneNo,
+                    navigate: `${process.env.CORS_ORIGIN}/request/${request?._id}`
+                })
+            })
+
+        }
+    });
+
+    request.reachedTo = alertUserList?.length;
+    request.save({ validateBeforeSave: false })
+
     return res.status(200)
         .json(new ApiResponse(200, { id: request?._id }, "request created"))
 })
+
 // creates a request report
 const createRequestReport = asyncHandler(async (req, res) => {
-    const { requestId } = req.body;
+    const { requestId } = req.params;
     const existedReport = await Report.findOne({ reportOn: requestId, reportBy: req.user._id });
     if (existedReport) throw new ApiError(402, "Report already created");
 
@@ -106,13 +171,21 @@ const deactiveRequest = asyncHandler(async (req, res) => {
 
 // helping on request
 const helpOnRequest = asyncHandler(async (req, res) => {
-    const { requestId } = req.body;
+    const { requestId } = req.params;
     const user = await User.findById(req.user._id);
+    if (!user?.isContactInfoFilled || !user?.isBloodGroupAdded) throw new ApiError(403, "profile is not Complete")
     const request = await Request.findById(requestId);
     if (!request || !request.isActive) throw new ApiError(400, "Request does not exist or not active");
+    const existedHelp = await Help.findOne({ requestId, helperId: user._id });
+    if (existedHelp) throw new ApiError(402, "Help already exists");
     await Help.create({
         requestId,
         helperId: user._id,
+        helperDetails: {
+            userName: user.userName,
+            bloodGroup: user.bloodGroup,
+            avatar: user.avatar
+        },
         helperContactInfo: {
             phoneNo: user.phoneNo,
             email: user.email,
@@ -123,11 +196,39 @@ const helpOnRequest = asyncHandler(async (req, res) => {
 
     await createNotification({
         notifiedTo: request.requestedBy,
-        title: "Help"
+        title: "Helping alert for your request",
+        body: `${user.userName} wants to help you for your blood donation request of request id - ${requestId}`,
+        actions: [{
+            name: "View details",
+            navigate: `/request/${requestId}`
+        }]
     })
+
+    request.approvedBy = request.approvedBy + 1;
+    request.save({ validateBeforeSave: false });
 
     return res.status(200)
         .json(new ApiResponse(200, {}, "Help created"))
+})
+
+// get request helps
+const getRequestHelps = asyncHandler(async (req, res) => {
+    const { requestId } = req.params;
+    const helpList = await Help.aggregate([
+        {
+            $match: {
+                requestId: new mongoose.Types.ObjectId(requestId)
+            }
+        },
+        {
+            $sort: {
+                createdAt: 1
+            }
+        }
+    ])
+
+    return res.status(200)
+        .json(new ApiResponse(200, helpList, "Help list fetched"));
 })
 
 export {
@@ -137,5 +238,6 @@ export {
     getRequestById,
     fulfillRequest,
     deactiveRequest,
-    helpOnRequest
+    helpOnRequest,
+    getRequestHelps
 }

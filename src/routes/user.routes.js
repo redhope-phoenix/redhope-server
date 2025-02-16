@@ -2,6 +2,7 @@ import { Router } from "express"
 import { checkAuth, getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, updateAvatar, updatePassword, updateUser, updateUserContactDetails, updateBloodGroup, getUserById } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { getUserNotifications } from "../controllers/notification.controller.js";
 
 const router = Router();
 
@@ -19,5 +20,7 @@ router.route("/update-avatar").patch(verifyJwt, upload.single('avatar'), updateA
 
 router.route("/current-user").get(verifyJwt, getCurrentUser);
 router.route("/get-user/:userId").get(getUserById);
+
+router.route("/get-notifications").get(verifyJwt, getUserNotifications);
 
 export default router;

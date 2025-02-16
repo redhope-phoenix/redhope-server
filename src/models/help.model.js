@@ -11,6 +11,9 @@ const helpSchema = new Schema({
         ref: "User",
         required: true
     },
+    helperDetails: {
+        type: Object
+    },
     helperContactInfo: {
         type: Object
     }

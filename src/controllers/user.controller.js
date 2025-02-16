@@ -3,7 +3,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import { uploadOnClodinary } from "../utils/cloudinary-connects.js";
+import { deleteFromClodinary, uploadOnClodinary } from "../utils/cloudinary-connects.js";
 import { sendSms } from "../utils/sms-service.js";
 import { createOtp } from "./otp.controller.js";
 
@@ -207,7 +207,8 @@ const updatePassword = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { username, email, dateOfBirth } = req.body
+    const { username, email, dateOfBirth } = req.body;
+    if ([username, email, dateOfBirth].some(e => e === "")) throw new ApiError("All fields are required");
     const currentUser = await User.findById(req.user?._id);
     const existedUser = await User.findOne({ email });
     if (existedUser && existedUser?.email !== currentUser.email) throw new ApiError(402, "Email already in use");
@@ -240,7 +241,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
 
     // removes old avatar from firebase cloud
     if (user?.avatar) {
-        await deleteFromFirebase(user?.avatar)
+        await deleteFromClodinary(user?.avatar)
     }
 
     // updates new Avatar

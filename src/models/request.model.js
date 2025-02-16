@@ -18,7 +18,7 @@ const requestSchema = new mongoose.Schema({
         type: String
     },
     date: {
-        type: String,
+        type: Date,
         required: true
     },
     bloodGroup: {
