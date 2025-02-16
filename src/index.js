@@ -6,9 +6,11 @@ dotenv.config({
     path: './env'
 })
 
-['log', 'warn', 'error', 'info', 'debug'].forEach(method => {
-    console[method] = () => {};
-});
+if (process.env.NODE_ENV === 'production') {
+    console.log = function() {};
+    console.error = function() {};
+    console.warn = function() {};
+}
 
 connectDb()
     .then(() => {
