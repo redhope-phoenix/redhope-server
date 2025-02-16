@@ -168,7 +168,7 @@ const getCampaignFeed = asyncHandler(async (req, res) => {
         },
         {
             $sort: {
-                date: -1
+                date: 1
             }
         }
     ])
