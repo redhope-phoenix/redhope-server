@@ -6,11 +6,10 @@ dotenv.config({
     path: './env'
 })
 
-// if (process.env.NODE_ENV === 'production') {
-//     console.log = function() {};
-//     console.error = function() {};
-//     console.warn = function() {};
-// }
+
+console.log = function () { };
+console.error = function () { };
+console.warn = function () { };
 
 connectDb()
     .then(() => {
