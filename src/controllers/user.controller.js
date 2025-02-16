@@ -55,12 +55,12 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, phoneNo, password } = req.body;
-    if ((!email && !phoneNo) || !password) throw new ApiError(400, "Fields are required");
+    if (!email || !password) throw new ApiError(400, "Fields are required");
 
-    const user = await User.findOne({ $or: [{ email }, { phoneNo }] });
+    const user = await User.findOne({ email });
     if (!user) throw new ApiError(402, "User not found");
     const isPasswordCorrect = await user.checkPassword(password);
-    if (!isPasswordCorrect) throw new ApiError(401, "Incorrect password");
+    if (!isPasswordCorrect) throw new ApiError(403, "Incorrect password");
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user?._id);
 
