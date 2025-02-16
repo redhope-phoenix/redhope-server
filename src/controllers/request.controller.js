@@ -8,7 +8,7 @@ import { User } from "../models/user.model.js";
 import { Help } from "../models/help.model.js";
 import { createNotification } from "./notification.controller.js";
 import { sendNodeEmail } from "../utils/send-email.js";
-import { donationRequirementMail } from "../utils/html.js";
+import { donationRequirementMail, requestedUserNotifMail } from "../utils/html.js";
 
 // creates a new request
 const createRequest = asyncHandler(async (req, res) => {
@@ -202,6 +202,22 @@ const helpOnRequest = asyncHandler(async (req, res) => {
             name: "View details",
             navigate: `/request/${requestId}`
         }]
+    })
+
+    const requestedByUser = await User.findById(request?.requestedBy);
+
+    await sendNodeEmail({
+        mailTo: requestedByUser?.email,
+        subject: "Donor found for donation",
+        html: requestedUserNotifMail({
+            userName: requestedByUser?.userName,
+            donorName: user?.userName,
+            address: `${user?.address?.addressLine}, ${user?.address?.district},${user?.address.state} - ${user?.pincode}`,
+            bloodGroup: user?.bloodGroup,
+            donorContact: user?.phoneNo,
+            navigate: `${process.env.CORS_ORIGIN}/request/${request?._id}`
+        })
+
     })
 
     request.approvedBy = request.approvedBy + 1;

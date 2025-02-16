@@ -17,7 +17,7 @@ export const sendNodeEmail = async ({ mailTo, subject, html }) => {
 
     // Email options
     const mailOptions = {
-        from: `Hostel Betting <${mailFrom}>`,
+        from: `Redhope <${mailFrom}>`,
         to: mailTo,
         subject,
         html

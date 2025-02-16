@@ -59,7 +59,7 @@ const donationRequirementMail = (props) => {
            <strong>Contact:</strong> ${props?.phoneNo}</p>
         <p>If you or someone you know can donate, please respond immediately.</p>
         <a href="${props?.navigate}" class="btn">View details</a>
-        <p class="footer">Thank you for being a lifesaver! ❤️<br>For more details, visit <a href="https://redhope.vercel.app">Redhope</p>
+        <p class="footer">Thank you for being a lifesaver! ❤️<br>For more details, visit <a href="https://redhope-health.vercel.app">Redhope</p>
     </div>
 
 </body>
@@ -134,7 +134,7 @@ const campaignAwarnessMail = (props) => {
         <p>Don't miss this opportunity to take a step towards a healthier future!</p>
         <a href="${props?.navigate}" class="btn">View details</a>
 
-        <p class="footer">Stay healthy, stay strong! 💙<br>For more details, visit <a href="https://redhope.vercel.app">Redhope</p>
+        <p class="footer">Stay healthy, stay strong! 💙<br>For more details, visit <a href="https://redhope-health.vercel.app">Redhope</p>
     </div>
 
 </body>
@@ -143,4 +143,79 @@ const campaignAwarnessMail = (props) => {
     )
 }
 
-export { donationRequirementMail, campaignAwarnessMail }
+const requestedUserNotifMail = (props) => {
+    return (
+        `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blood Donor Found! ❤️</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #d32f2f;
+            text-align: center;
+        }
+        p {
+            color: #333;
+            line-height: 1.6;
+        }
+        .btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #039a30;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Great News! A Donor Has Accepted Your Request ❤️</h2>
+        <p>Dear <strong>${props?.userName}</strong>,</p>
+        <p>We are happy to inform you that a generous donor has accepted your blood donation request for <strong>${props?.bloodGroup}</strong>.</p>
+        
+        <p><strong>🩸 Donor Name:</strong> ${props?.donorName}<br>
+           <strong>📍 Location:</strong> ${props?.address}<br>
+           <strong>📞 Contact:</strong> ${props?.donorContact}</p>
+        
+        <p>Please get in touch with the donor and make the necessary arrangements. We appreciate your patience and hope this donation brings relief to those in need.</p>
+        
+        <a href="${props?.navigate}" class="btn">View Request</a>
+
+        <p class="footer">Thank you for using our platform to save lives! ❤️<br>For more details, visit <a href="https://redhope-health.vercel.app">Redhope</p>
+    </div>
+
+</body>
+</html>
+`
+    )
+}
+
+export { donationRequirementMail, campaignAwarnessMail, requestedUserNotifMail }
