@@ -89,9 +89,20 @@ const logoutUser = asyncHandler(async (req, res) => {
         }
     }, { new: true });
 
+    const expiresInDays = parseInt(process.env.LOG_COOKIE_EXPIRY, 10);
+    const expiresDate = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+    const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        origin: process.env.CORS_ORIGIN,
+        path: '/',
+        expires: expiresDate
+    }
+
     return res.status(200)
-        .clearCookie("accessToken")
-        .clearCookie("refreshToken")
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
         .json(new ApiResponse(200, {}, "User logged out"))
 })
 

@@ -34,7 +34,7 @@ const createCampaign = asyncHandler(async (req, res) => {
 
     // awareness notifications
     let pincodeList = [];
-    for (let i = -4; i < 5; i++)pincodeList.push({ pincode: Number(pincode) + i });
+    for (let i = -4; i < 5; i++)pincodeList.push({ pincode: String(Number(pincode) + i) });
 
     const userList = await User.aggregate([
         {
@@ -147,20 +147,23 @@ const removeCampaign = asyncHandler(async (req, res) => {
 
 // get campaign feeds
 const getCampaignFeed = asyncHandler(async (req, res) => {
-    const { pincode, filter } = req.body;
+    const { pincode, filter } = req.query;
 
     // filter by nearest pincodes
     let pincodeList = [];
-    for (let i = -4; i < 5; i++)pincodeList.push({ pincode: Number(pincode) + i });
+    for (let i = -4; i < 5; i++)pincodeList.push({ pincode: String(Number(pincode) + i) });
 
-    const matches = filter === "pincode" ? { $or: pincodeList } : {};
+    let matches = { isActive: true };
+    if (filter === "pincode" && pincode) {
+        matches = {
+            ...matches,
+            $or: pincodeList
+        }
+    }
 
     const campaignList = await Campaign.aggregate([
         {
-            $match: {
-                ...matches,
-                isActive: true
-            },
+            $match: matches
 
         },
         {
