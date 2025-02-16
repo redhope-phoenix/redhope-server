@@ -6,6 +6,10 @@ dotenv.config({
     path: './env'
 })
 
+['log', 'warn', 'error', 'info', 'debug'].forEach(method => {
+    console[method] = () => {};
+});
+
 connectDb()
     .then(() => {
         app.listen(process.env.PORT, () => {
