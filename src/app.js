@@ -16,6 +16,10 @@ app.use(express.static('public'))
 
 scheduleCron();
 
+app.get("/ping", (req, res) => {
+    res.send("Ping successful");
+});
+
 import userRouter from "./routes/user.routes.js"
 import campaignRouter from "./routes/campaign.routes.js";
 import requestRouter from "./routes/request.routes.js";
