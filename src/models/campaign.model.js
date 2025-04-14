@@ -32,6 +32,9 @@ const campaignSchema = new mongoose.Schema({
     contactNo: {
         type: String
     },
+    registrationLink: {
+        type: String
+    },
     leaflet: {
         type: String
     },

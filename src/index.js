@@ -7,9 +7,9 @@ dotenv.config({
 })
 
 
-console.log = function () { };
-console.error = function () { };
-console.warn = function () { };
+// console.log = function () { };
+// console.error = function () { };
+// console.warn = function () { };
 
 connectDb()
     .then(() => {

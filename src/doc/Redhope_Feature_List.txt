@@ -1,0 +1,34 @@
+
+Redhope Feature List
+
+Feature 1: Create Blood Donation Requests
+Description: Users can create a blood donation request by providing necessary details such as blood group, reason for donation, required date, contact information, etc.
+URL: https://redhope-health.vercel.app/create-request
+
+Feature 2: Contribute Campaign
+Description: Users can share information about any health campaign they know about by filling out a form with details like date, time, venue, and campaign leaflet.
+URL: https://redhope-health.vercel.app/create-campaign
+
+Feature 3: Request History
+Description: Users can view their blood donation request history, which lists all previous requests made.
+URL: https://redhope-health.vercel.app/profile/requests
+
+Feature 4: Campaign Contribution History
+Description: Users can view the campaigns they have previously contributed to and shared on Redhope.
+URL: https://redhope-health.vercel.app/profile/contributions
+
+Feature 5: Edit Profile
+Description: Users can update personal information like name, date of birth, contact details, address, and blood group.
+URL: https://redhope-health.vercel.app/profile-edit
+
+Feature 6: Notifications
+Description: Users can view notifications related to blood donation requests, health campaigns, and other relevant updates.
+URL: https://redhope-health.vercel.app/notifications
+
+Feature 7: Privacy Policy
+Description: Users can read the privacy policy of Redhope.
+URL: https://redhope-health.vercel.app/privacy
+
+Feature 8: Terms and Conditions
+Description: Users can review the terms and conditions of using Redhope.
+URL: https://redhope-health.vercel.app/terms

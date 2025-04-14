@@ -12,7 +12,7 @@ import { campaignAwarnessMail } from "../utils/html.js";
 import { formatDate } from "../utils/date-converter.js";
 
 const createCampaign = asyncHandler(async (req, res) => {
-    const { title, category, description, time, date, address, pincode, contactNo } = req.body;
+    const { title, category, description, time, date, address, pincode, contactNo, registrationLink } = req.body;
     if ([title, category, date, address, pincode].some(e => e === "")) throw new ApiError(400, "All fields are required");
 
     const leafletFile = req.file?.path;
@@ -29,6 +29,7 @@ const createCampaign = asyncHandler(async (req, res) => {
         time,
         date,
         pincode,
+        registrationLink,
         leaflet: leaflet?.url || ""
     });
 
@@ -64,7 +65,7 @@ const createCampaign = asyncHandler(async (req, res) => {
 
             await sendNodeEmail({
                 mailTo: user?.email,
-                subject: "Health awareness camp inyour locality",
+                subject: "Health awareness camp in your locality",
                 html: campaignAwarnessMail({
                     userName: user?.userName,
                     address: `${address?.addressLine}, ${address?.district},${address.state} - ${pincode}`,
