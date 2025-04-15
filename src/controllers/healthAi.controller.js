@@ -2,7 +2,7 @@ import axios from "axios";
 import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
-import fs from "fs";
+import { redhopeFAQs, redhopeFeatues } from "../utils/get-doc.js";
 
 
 const systemPrompt = `
@@ -33,6 +33,12 @@ use markdown so that it limited to h4 or lesser headings. Use bullet points and 
 - **Disclaimer**: Remind the user that this is general health guidance and not a substitute for personalized medical advice from a licensed healthcare provider.
 
 Maintain a warm, empathetic, and professional tone. Do not invent health concerns from unrelated prompts. Avoid headings like “Related Models” or “No Comments.”
+
+${redhopeFeatues}
+${redhopeFAQs}
+
+Always provide navigation urls for the user to navigate to the relevant page. For example, if the user asks about how to request blood, provide the link to the request page. If they ask about privacy policy, provide the link to the privacy policy page.
+
 `
 
 const healthAiService = asyncHandler(async (req, res) => {

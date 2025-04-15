@@ -20,7 +20,7 @@ const createRequest = asyncHandler(async (req, res) => {
 
     // alerts others
     let alertPincodeList = [];
-    for (let i = -2; i < 3; i++)alertPincodeList.push({ pincode: String(Number(pincode) + i) });
+    for (let i = -2; i < 3; i++)alertPincodeList.push(String(Number(pincode) + i));
 
     let bloodGroupList = [];
     if (bloodGroup === "AB+") bloodGroupList = ["A+", "B+", "AB+", "O+", "A-", "B-", "AB-", "O-"];
@@ -34,8 +34,11 @@ const createRequest = asyncHandler(async (req, res) => {
     const alertUserList = await User.aggregate([
         {
             $match: {
-                $or: alertPincodeList,
-                $or: bloodGroupObjList
+                $and: [
+                    { pincode: { $in: alertPincodeList } },
+                    { bloodGroup: { $in: bloodGroupList } }
+                ],
+                isBloodGroupAdded: true
             }
         },
         {
